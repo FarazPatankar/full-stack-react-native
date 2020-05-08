@@ -1,19 +1,47 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
-export default function App() {
+import Firebase from './lib/firebase';
+
+import Home from './screens/Home';
+import Signup from './screens/Signup';
+import Login from './screens/Login';
+
+const RootStack = createStackNavigator();
+const AuthenticationStack = createStackNavigator();
+
+const App = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    Firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+    });
+  }, []);
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-    </View>
+    <NavigationContainer>
+      {user && (
+        <RootStack.Navigator
+          screenOptions={{ headerShown: false }}
+        >
+          <RootStack.Screen name="Home" component={Home} />
+        </RootStack.Navigator>
+      )}
+      {!user && (
+        <AuthenticationStack.Navigator
+          screenOptions={{ headerShown: false }}
+        >
+          <AuthenticationStack.Screen name="Signup" component={Signup} />
+          <AuthenticationStack.Screen name="Login" component={Login} />
+        </AuthenticationStack.Navigator>
+      )}
+    </NavigationContainer>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;
