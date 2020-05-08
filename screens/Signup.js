@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import tailwind from 'tailwind-rn';
 
-import Firebase from '../lib/firebase';
+import Firebase, { fns } from '../lib/firebase';
 
 const Signup = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -12,7 +12,9 @@ const Signup = ({ navigation }) => {
 
   const handleSignup = async () => {
     try {
-      await Firebase.auth().createUserWithEmailAndPassword(email, password);
+      const registerUser = fns.httpsCallable('registerUser');
+      await registerUser({ email, password });
+      await Firebase.auth().signInWithEmailAndPassword(email, password);
     } catch (error) {
       console.error(error);
       Alert.alert('Error', error.message);
