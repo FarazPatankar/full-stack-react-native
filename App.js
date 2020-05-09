@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { ApolloProvider } from '@apollo/client';
 
 import Firebase from './lib/firebase';
+import { apolloClient } from './lib/apollo';
 
 import Home from './screens/Home';
 import Signup from './screens/Signup';
@@ -13,6 +15,7 @@ const AuthenticationStack = createStackNavigator();
 
 const App = () => {
   const [user, setUser] = useState(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     Firebase.auth().onAuthStateChanged((user) => {
@@ -21,16 +24,21 @@ const App = () => {
       } else {
         setUser(null);
       }
+      setReady(true);
     });
   }, []);
+
+  if (!ready) return null;
   return (
     <NavigationContainer>
       {user && (
-        <RootStack.Navigator
-          screenOptions={{ headerShown: false }}
-        >
-          <RootStack.Screen name="Home" component={Home} />
-        </RootStack.Navigator>
+        <ApolloProvider client={apolloClient}>
+          <RootStack.Navigator
+            screenOptions={{ headerShown: false }}
+          >
+            <RootStack.Screen name="Home" component={Home} />
+          </RootStack.Navigator>
+        </ApolloProvider>
       )}
       {!user && (
         <AuthenticationStack.Navigator
